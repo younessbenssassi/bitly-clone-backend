@@ -38,16 +38,17 @@ class TodoController extends Controller
         $title = $request->get('title');
         $users_ids = $request->get('users_ids');
         $admins_ids = $request->get('admins_ids');
-        Todo::create([
+        $user_type = $request->get('user_type');
+        $todo = Todo::create([
             'title' => $title,
             'users_ids' => $users_ids,
             'admins_ids' => $admins_ids,
+            'user_type' => $user_type,
             'status' => 0,
         ]);
-        $data = Todo::latest()->first();
         return Response()->json([
             'status' => true,
-            'todo' => $data
+            'todo' => $todo
         ]);
     }
 
@@ -85,36 +86,59 @@ class TodoController extends Controller
         $title = $request->get('title');
         $users_ids = $request->get('users_ids');
         $admins_ids = $request->get('admins_ids');
+        $user_type = $request->get('user_type');
 
         $todo = Todo::find($id);
-        $todo->title = $title;
-        $todo->users_ids = $users_ids;
-        $todo->admins_ids = $admins_ids;
-        $todo->update();
-        return Response()->json([
-            'status' => true,
-            'todo' => $todo
-        ]);
+        if($todo){
+            $todo->title = $title;
+            $todo->users_ids = $users_ids;
+            $todo->admins_ids = $admins_ids;
+            $todo->user_type = $user_type;
+            $todo->update();
+            return Response()->json([
+                'status' => true,
+                'todo' => $todo
+            ]);
+        }else{
+            return Response()->json([
+                'status' => false,
+            ]);
+        }
+
     }
     public function markAsDone($id)
     {
         $todo = Todo::find($id);
-        $todo->status = 1;
-        $todo->update();
-        return Response()->json([
-            'status' => true,
-            'todo' => $todo
-        ]);
+        if($todo){
+            $todo->status = 1;
+            $todo->update();
+            return Response()->json([
+                'status' => true,
+                'todo' => $todo
+            ]);
+        }else{
+            return Response()->json([
+                'status' => false,
+            ]);
+        }
+
     }
     public function markAsNotDone($id)
     {
         $todo = Todo::find($id);
-        $todo->status = 0;
-        $todo->update();
-        return Response()->json([
-            'status' => true,
-            'todo' => $todo
-        ]);
+        if($todo){
+            $todo->status = 0;
+            $todo->update();
+            return Response()->json([
+                'status' => true,
+                'todo' => $todo
+            ]);
+        }else{
+            return Response()->json([
+                'status' => false,
+            ]);
+        }
+
     }
 
     /**
@@ -138,9 +162,16 @@ class TodoController extends Controller
     public function destroy($id)
     {
         $todo = Todo::find($id);
-        $todo->delete();
-        return Response()->json([
-            'status' => true,
-        ]);
+        if($todo){
+            $todo->delete();
+            return Response()->json([
+                'status' => true,
+            ]);
+        }else{
+            return Response()->json([
+                'status' => false,
+            ]);
+        }
+
     }
 }

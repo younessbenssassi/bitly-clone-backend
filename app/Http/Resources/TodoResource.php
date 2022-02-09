@@ -30,6 +30,7 @@ class TodoResource extends JsonResource
             'id' => $this->id,
             'title' => $this->title,
             'status' => $this->status,
+            'user_type' => $this->user_type,
             'users_ids' => $this->users_ids,
             'admins_ids' => $this->admins_ids,
             'users' => $users,

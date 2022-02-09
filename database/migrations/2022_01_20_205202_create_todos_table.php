@@ -18,6 +18,7 @@ class CreateTodosTable extends Migration
             $table->json('users_ids');
             $table->json('admins_ids');
             $table->String('title');
+            $table->String('user_type');
             $table->boolean('status')->default(0);
             $table->timestamps();
         });
