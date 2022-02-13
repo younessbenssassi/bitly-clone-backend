@@ -64,6 +64,6 @@ class User extends Authenticatable implements JWTSubject
     }
 
     public function todos(){
-        return $this->morphToMany(Todo::class);
+        return $this->morphToMany(Todo::class,'todoable');
     }
 }

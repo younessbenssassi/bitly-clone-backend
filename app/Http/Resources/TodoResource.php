@@ -16,25 +16,22 @@ class TodoResource extends JsonResource
      */
     public function toArray($request)
     {
-        $users = [];
-        $admins = [];
-        foreach ( $this->users_ids as $id){
-            $user = User::find($id);
-            array_push($users, $user);
+        $users_ids = [];
+        $admins_ids = [];
+        foreach ( $this->users as $user){
+            array_push($users_ids, $user->id);
         }
-        foreach ( $this->admins_ids as $id){
-            $admin = Admin::find($id);
-            array_push($admins, $admin);
+        foreach ( $this->admins as $admin){
+            array_push($admins_ids, $admin->id);
         }
         return [
             'id' => $this->id,
             'title' => $this->title,
             'status' => $this->status,
-            'user_type' => $this->user_type,
-            'users_ids' => $this->users_ids,
-            'admins_ids' => $this->admins_ids,
-            'users' => $users,
-            'admins' => $admins,
+            'users' => $this->users,
+            'admins' => $this->admins,
+            'users_ids' => $users_ids,
+            'admins_ids' => $admins_ids,
         ];
     }
 }

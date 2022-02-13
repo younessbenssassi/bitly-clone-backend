@@ -9,6 +9,6 @@ class Admin extends Model
 {
     use HasFactory;
     public function todos(){
-        return $this->morphToMany(Todo::class);
+        return $this->morphToMany(Todo::class,'todoable');
     }
 }

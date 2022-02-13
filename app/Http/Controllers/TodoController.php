@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 use Input;
 use App\Http\Resources\TodoResource;
 use App\Models\Todo;
+use App\Models\User;
+use App\Models\Admin;
 use App\Http\Requests\StoreTodoRequest;
 use App\Http\Requests\UpdateTodoRequest;
 use Illuminate\Http\Response;
@@ -20,7 +22,6 @@ class TodoController extends Controller
     public function index()
     {
         $todos = Todo::all();
-        //return TodoResource::collection($todos);
         return Response()->json([
             'status' => true,
             'todos' => TodoResource::collection($todos)
@@ -34,18 +35,12 @@ class TodoController extends Controller
      */
     public function create(Request $request)
     {
-        //
-        $title = $request->get('title');
-        $users_ids = $request->get('users_ids');
-        $admins_ids = $request->get('admins_ids');
-        $user_type = $request->get('user_type');
         $todo = Todo::create([
-            'title' => $title,
-            'users_ids' => $users_ids,
-            'admins_ids' => $admins_ids,
-            'user_type' => $user_type,
+            'title' => $request->get('title'),
             'status' => 0,
         ]);
+        $todo->users()->attach($request->get('users_ids'));
+        $todo->admins()->attach($request->get('admins_ids'));
         return Response()->json([
             'status' => true,
             'todo' => $todo
@@ -83,17 +78,11 @@ class TodoController extends Controller
      */
     public function edit(Request $request,$id)
     {
-        $title = $request->get('title');
-        $users_ids = $request->get('users_ids');
-        $admins_ids = $request->get('admins_ids');
-        $user_type = $request->get('user_type');
-
         $todo = Todo::find($id);
         if($todo){
-            $todo->title = $title;
-            $todo->users_ids = $users_ids;
-            $todo->admins_ids = $admins_ids;
-            $todo->user_type = $user_type;
+            $todo->title = $request->get('title');
+            $todo->users()->sync($request->get('users_ids'),true);
+            $todo->admins()->sync($request->get('admins_ids'),true);
             $todo->update();
             return Response()->json([
                 'status' => true,
@@ -163,6 +152,8 @@ class TodoController extends Controller
     {
         $todo = Todo::find($id);
         if($todo){
+            $todo->users()->detach();
+            $todo->admins()->detach();
             $todo->delete();
             return Response()->json([
                 'status' => true,

@@ -17,9 +17,9 @@ class Todo extends Model
     ];
 
     public function users(){
-        return $this->morphToMany(User::class);
+        return $this->morphedByMany(User::class,'todoable');
     }
     public function admins(){
-        return $this->morphToMany(Admin::class);
+        return $this->morphedByMany(Admin::class,'todoable');
     }
 }
