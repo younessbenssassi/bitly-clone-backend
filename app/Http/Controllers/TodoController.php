@@ -37,6 +37,7 @@ class TodoController extends Controller
     {
         $todo = Todo::create([
             'title' => $request->get('title'),
+            'type' => $request->get('type'),
             'status' => 0,
         ]);
         $todo->users()->attach($request->get('users_ids'));
@@ -81,8 +82,16 @@ class TodoController extends Controller
         $todo = Todo::find($id);
         if($todo){
             $todo->title = $request->get('title');
-            $todo->users()->sync($request->get('users_ids'),true);
-            $todo->admins()->sync($request->get('admins_ids'),true);
+            $todo->type = $request->get('type');
+            if($request->get('type') === 'user'){
+                $todo->users()->sync($request->get('users_ids'),true);
+                $todo->admins()->sync([],true);
+            }else{
+                $todo->admins()->sync($request->get('admins_ids'),true);
+                $todo->users()->sync([],true);
+            }
+
+
             $todo->update();
             return Response()->json([
                 'status' => true,
