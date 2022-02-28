@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-use Input;
+use Input,Validator;
 use App\Http\Resources\TodoResource;
 use App\Models\Todo;
 use App\Models\User;
@@ -11,7 +11,6 @@ use App\Http\Requests\UpdateTodoRequest;
 use Illuminate\Http\Response;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Request;
-
 class TodoController extends Controller
 {
     /**
@@ -35,6 +34,23 @@ class TodoController extends Controller
      */
     public function create(Request $request)
     {
+        $validator = Validator::make(
+            [
+                'title' => $request->get('title'),
+                'type' => $request->get('type'),
+            ],
+            [
+                'title' => 'required',
+                'type' => 'required',
+            ]
+        );
+        if ($validator->fails())
+        {
+            return Response()->json([
+                'status' => false,
+                'message' => 'please make sure that you filled all fields'
+            ]);
+        }
         $todo = Todo::create([
             'title' => $request->get('title'),
             'type' => $request->get('type'),
@@ -79,6 +95,23 @@ class TodoController extends Controller
      */
     public function edit(Request $request,$id)
     {
+        $validator = Validator::make(
+            [
+                'title' => $request->get('title'),
+                'type' => $request->get('type'),
+            ],
+            [
+                'title' => 'required',
+                'type' => 'required',
+            ]
+        );
+        if ($validator->fails())
+        {
+            return Response()->json([
+                'status' => false,
+                'message' => 'please make sure that you filled all fields'
+            ]);
+        }
         $todo = Todo::find($id);
         if($todo){
             $todo->title = $request->get('title');
@@ -106,6 +139,21 @@ class TodoController extends Controller
     }
     public function markAsDone($id)
     {
+        $validator = Validator::make(
+            [
+                'id' => $id,
+            ],
+            [
+                'id' => 'required',
+            ]
+        );
+        if ($validator->fails())
+        {
+            return Response()->json([
+                'status' => false,
+                'message' => 'please make sure that you are passing the todo id'
+            ]);
+        }
         $todo = Todo::find($id);
         if($todo){
             $todo->status = 1;
@@ -123,6 +171,21 @@ class TodoController extends Controller
     }
     public function markAsNotDone($id)
     {
+        $validator = Validator::make(
+            [
+                'id' => $id,
+            ],
+            [
+                'id' => 'required',
+            ]
+        );
+        if ($validator->fails())
+        {
+            return Response()->json([
+                'status' => false,
+                'message' => 'please make sure that you are passing the todo id'
+            ]);
+        }
         $todo = Todo::find($id);
         if($todo){
             $todo->status = 0;
