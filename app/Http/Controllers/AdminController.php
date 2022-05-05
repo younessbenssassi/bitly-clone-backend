@@ -38,7 +38,7 @@ class AdminController extends Controller
      * @return Response
      */
     public function store(StoreAdminRequest $request)
-    { 
+    {
         //
     }
 
