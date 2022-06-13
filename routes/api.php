@@ -24,9 +24,4 @@ Route::get('/users', [UserController::class, 'index']);
 Route::get('/admins', [AdminController::class, 'index']);
 
 ##Todos APIs
-Route::get('/todos', [TodoController::class, 'index']);
-Route::put('/todo/{id}', [TodoController::class, 'edit']);
-Route::put('/markAsDone/{id}', [TodoController::class, 'markAsDone']);
-Route::put('/markAsNotDone/{id}', [TodoController::class, 'markAsNotDone']);
-Route::post('/todo', [TodoController::class, 'create']);
-Route::delete('/todo/{id}', [TodoController::class, 'destroy']);
+
