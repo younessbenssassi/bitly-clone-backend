@@ -1,10 +1,10 @@
 <?php
 
 ##use Illuminate\Http\Request;
+use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\AdminController;
-use App\Http\Controllers\TodoController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -19,9 +19,27 @@ use App\Http\Controllers\TodoController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });*/
-
+/*
 Route::get('/users', [UserController::class, 'index']);
 Route::get('/admins', [AdminController::class, 'index']);
 
-##Todos APIs
+Route::post('login', 'App\Http\Controllers\Api\AuthController@login');
+
+Route::post('logout','App\Http\Controllers\Api\AuthController@logout') -> middleware(['auth.guard:admin-api']);
+*/
+Route::post('login', 'App\Http\Controllers\Api\AuthController@login');
+
+Route::post('logout','App\Http\Controllers\Api\AuthController@logout') -> middleware(['auth.guard:admin-api']);
+Route::group(['middleware' => ['api'], 'namespace' => 'Api'], function () {
+
+
+    Route::group(['prefix' => 'user' ,'middleware' => 'auth.guard:user-api'],function (){
+        Route::post('profile',function(){
+            return  \Auth::user(); // return authenticated user data
+        }) ;
+
+
+    });
+
+});
 
