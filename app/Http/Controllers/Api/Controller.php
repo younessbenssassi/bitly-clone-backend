@@ -28,11 +28,10 @@ class Controller extends BaseController
         ];
     }
 
-    public function returnData($key, $value, $msg = ""): \Illuminate\Http\JsonResponse
+    public function returnData($key, $value): \Illuminate\Http\JsonResponse
     {
         return response()->json([
             'status' => true,
-            'message' => $msg,
             $key => $value
         ]);
     }
