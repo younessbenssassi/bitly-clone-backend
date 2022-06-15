@@ -4,10 +4,17 @@ namespace App\Http\Controllers\Api;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
-use Tymon\JWTAuth\Facades\JWTAuth;
+use App\Http\Controllers\Api\Controller;
+
+//use Validator;
+//use Auth;
 
 class AuthController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('api', ['except' => ['login']]);
+    }
 
     public function login(Request $request): \Illuminate\Http\JsonResponse
     {
@@ -31,25 +38,24 @@ class AuthController extends Controller
             $credentials = $request->only(['email', 'password']);
 
             $namespace = $request->header('namespace');
-            $token = null;
             if($namespace === 'admin'){
-                $token = Auth::guard('admin-api')->attempt($credentials);
+                $token = auth('admin-api')->attempt($credentials);
             }else{
-                $token = Auth::guard('user-api')->attempt($credentials);
+                $token = auth('admin-api')->attempt($credentials);
             }
+
             if (!$token)
-                return $this->returnError('بيانات الدخول غير صحيحة');
-
+                return $this->returnError('Emil or password not correct');
 
             if($namespace === 'admin'){
-                $account = Auth::guard('admin-api')->user();
-                $account->idAdmin = true;
+                $account = auth('admin-api')->user();
+                $account->isAdmin = true;
             }else{
-                $account = Auth::guard('user-api')->user();
-                $account->idAdmin = false;
+                $account =auth('user-api')->user();
+                $account->isAdmin = false;
             }
 
-            $account->api_token = $token;
+            $account->access_token = $token;
             //return token
             return $this->returnData('account', $account);
 
@@ -62,11 +68,21 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        $token = $request -> header('auth-token');
-        if($token){
+        //$token = $request->header('access_token');
+        $namespace = $request->header('namespace');
+        if($namespace === 'admin')
+            $account = Auth::guard('admin-api')->user();
+        else
+            $account =Auth::guard('user-api')->user();
+
+        if(!is_null($namespace) && !is_null($account)){
             try {
 
-                JWTAuth::setToken($token)->invalidate(); //logout
+                if($namespace === 'admin')
+                    Auth::guard('admin-api')->logout();
+                else
+                    Auth::guard('user-api')->logout();
+
             }catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e){
                 return  $this -> returnError('some thing went wrongs');
             }
@@ -75,5 +91,21 @@ class AuthController extends Controller
             $this -> returnError('some thing went wrongs');
         }
 
+    }
+
+    public function me(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $namespace = $request->header('namespace');
+        if($namespace === 'admin')
+            $account = Auth::guard('admin-api')->user();
+        else
+            $account =Auth::guard('user-api')->user();
+
+        return $this->returnData('account', $account);
+    }
+    public function refresh(Request $request)
+    {
+        $token = auth()->refresh();
+        //return $this->respondWithToken(auth()->refresh());
     }
 }
