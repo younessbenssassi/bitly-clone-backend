@@ -1,4 +1,4 @@
 <?php
 Route::middleware(['api'])->group(function () {
-    Route::apiResource('channel', 'App\Http\Controllers\Api\ChannelController');
+    Route::apiResource('admin/channel', 'App\Http\Controllers\Api\ChannelController');
 });

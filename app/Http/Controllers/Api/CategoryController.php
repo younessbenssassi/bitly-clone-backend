@@ -14,7 +14,21 @@ class CategoryController extends Controller
     //
     public function index(Request $request): JsonResponse
     {
-        $categories = Category::with('channels')->get();
+        $search = $request->get('search');
+        $page = $request->get('page', 1);
+        $offset = 0;
+        if ($page > 1)
+        {
+            $offset = $page * 20;
+        }
+        $categories = Category::with('channels')
+            ->when(!is_null($search),function($q) use($search){
+               return $q->where('name','like',"%{$search}%");
+            })
+            ->orderBy('id', 'DESC')
+            ->offset($offset)
+            ->limit(20)
+            ->get();
         if(is_null($categories)){
             return $this->returnError('Categories not found');
         }

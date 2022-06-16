@@ -14,7 +14,21 @@ class ChannelController extends Controller
     //
     public function index(Request $request): JsonResponse
     {
-        $channels = Channel::with('category')->get();
+        $search = $request->get('search');
+        $page = $request->get('page', 1);
+        $offset = 0;
+        if ($page > 1)
+        {
+            $offset = $page * 20;
+        }
+        $channels = Channel::with('category')
+            ->when(!is_null($search),function($q) use($search){
+                return $q->where('name','like',"%{$search}%");
+            })
+            ->orderBy('id', 'DESC')
+            ->offset($offset)
+            ->limit(20)
+            ->get();
 
         if(is_null($channels)){
             return $this->returnError('Channels not found');

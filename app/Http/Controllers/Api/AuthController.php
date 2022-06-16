@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Api\Controller;
@@ -16,7 +17,7 @@ class AuthController extends Controller
         $this->middleware('api', ['except' => ['login']]);
     }
 
-    public function login(Request $request): \Illuminate\Http\JsonResponse
+    public function login(Request $request): JsonResponse
     {
 
         try {
@@ -37,23 +38,14 @@ class AuthController extends Controller
 
             $credentials = $request->only(['email', 'password']);
 
-            $namespace = $request->header('namespace');
-            if($namespace === 'admin'){
-                $token = auth('admin-api')->attempt($credentials);
-            }else{
-                $token = auth('admin-api')->attempt($credentials);
-            }
+            $guard = $request->header('guard');
+            $token = auth($guard)->attempt($credentials);
 
             if (!$token)
                 return $this->returnError('Emil or password not correct');
 
-            if($namespace === 'admin'){
-                $account = auth('admin-api')->user();
-                $account->isAdmin = true;
-            }else{
-                $account =auth('user-api')->user();
-                $account->isAdmin = false;
-            }
+            $account = auth($guard)->user();
+            $account->isAdmin = $guard === 'admin-api';
 
             $account->access_token = $token;
             //return token
@@ -68,44 +60,19 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        //$token = $request->header('access_token');
-        $namespace = $request->header('namespace');
-        if($namespace === 'admin')
-            $account = Auth::guard('admin-api')->user();
-        else
-            $account =Auth::guard('user-api')->user();
+        $guard = $request->header('guard');
+        $account = Auth::guard($guard)->user();
 
-        if(!is_null($namespace) && !is_null($account)){
+        if(!is_null($account)){
             try {
-
-                if($namespace === 'admin')
-                    Auth::guard('admin-api')->logout();
-                else
-                    Auth::guard('user-api')->logout();
-
+                Auth::guard($guard)->logout();
             }catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e){
                 return  $this -> returnError('some thing went wrongs');
             }
             return $this->returnSuccessMessage('Logged out successfully');
         }else{
-            $this -> returnError('some thing went wrongs');
+            return $this->returnError('some thing went wrongs');
         }
 
-    }
-
-    public function me(Request $request): \Illuminate\Http\JsonResponse
-    {
-        $namespace = $request->header('namespace');
-        if($namespace === 'admin')
-            $account = Auth::guard('admin-api')->user();
-        else
-            $account =Auth::guard('user-api')->user();
-
-        return $this->returnData('account', $account);
-    }
-    public function refresh(Request $request)
-    {
-        $token = auth()->refresh();
-        //return $this->respondWithToken(auth()->refresh());
     }
 }

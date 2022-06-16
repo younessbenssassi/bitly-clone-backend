@@ -11,6 +11,7 @@ class Admin extends Authenticatable implements JWTSubject
 {
     use HasFactory;
 
+    protected $guard = 'admin-api';
     protected $fillable = [
         'name',
         'email',

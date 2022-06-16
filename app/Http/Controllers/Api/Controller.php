@@ -5,17 +5,18 @@ namespace App\Http\Controllers\Api;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller as BaseController;
 use function response;
 
 class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
-    public function returnError($msg): \Illuminate\Http\JsonResponse
+    public function returnError($msg):JsonResponse
     {
         return response()->json([
             'status' => false,
-            'message' => $msg
+            'error' => $msg
         ]);
     }
 
@@ -28,7 +29,7 @@ class Controller extends BaseController
         ];
     }
 
-    public function returnData($key, $value): \Illuminate\Http\JsonResponse
+    public function returnData($key, $value):JsonResponse
     {
         return response()->json([
             'status' => true,
@@ -38,7 +39,7 @@ class Controller extends BaseController
 
 
     //////////////////
-    public function returnValidationError($code = "E001", $validator): \Illuminate\Http\JsonResponse
+    public function returnValidationError($code = "E001", $validator): JsonResponse
     {
         return $this->returnError($code, $validator->errors()->first());
     }
