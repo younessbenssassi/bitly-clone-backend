@@ -36,13 +36,13 @@ class AuthController extends Controller
 
             //login
 
-            $credentials = $request->only(['email', 'password']);
-
             $guard = $request->header('guard');
+            $credentials = $request->only(['email', 'password']);
             $token = auth($guard)->attempt($credentials);
 
+
             if (!$token)
-                return $this->returnError('Emil or password not correct');
+                return $this->returnError('Email or password not correct');
 
             $account = auth($guard)->user();
             $account->isAdmin = $guard === 'admin-api';
@@ -86,7 +86,8 @@ class AuthController extends Controller
         }
 
         try {
-            $token = Auth::guard($guard)->tokenById($account['id']);
+            //$token = Auth::guard($guard)->tokenById($account['id']);
+            $token = Auth::guard($guard)->refresh();
             if(is_null($token))
                 return  $this->returnError('some thing went wrongs');
 
@@ -126,7 +127,7 @@ class AuthController extends Controller
             $token = auth($guard)->attempt($credentials);
 
             if (!$token)
-                return $this->returnError('Emil or password not correct');
+                return $this->returnError('Email or password not correct');
 
             $account = auth($guard)->user();
             $account->isAdmin = $guard === 'admin-api';
