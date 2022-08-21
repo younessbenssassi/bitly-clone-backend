@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateChannelsTable extends Migration
+class CreateSubscriptionsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,13 @@ class CreateChannelsTable extends Migration
      */
     public function up()
     {
-        Schema::create('channels', function (Blueprint $table) {
+        Schema::create('subscriptions', function (Blueprint $table) {
             $table->id();
-            $table->integer('category_id')->nullable();
-            $table->string('name');
-            $table->string('slug');
-            $table->text('src');
+            $table->string('hash');
+            $table->integer('user_id')->nullable();
+            $table->date('start_date');
+            $table->date('end_date');
+            $table->integer('amount');
             $table->timestamps();
         });
     }

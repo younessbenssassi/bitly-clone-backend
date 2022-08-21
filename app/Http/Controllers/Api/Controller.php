@@ -12,6 +12,13 @@ use function response;
 class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
+    public function sendErrorValidator(&$validator,$code = 400) : JsonResponse{
+        return Response()->json([
+            'status' => false,
+            'error' => $validator->errors()
+        ],$code);
+    }
+
     public function returnError($msg):JsonResponse
     {
         return response()->json([

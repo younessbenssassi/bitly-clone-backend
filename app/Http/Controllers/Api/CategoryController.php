@@ -18,9 +18,8 @@ class CategoryController extends Controller
         $page = $request->get('page', 1);
         $offset = 0;
         if ($page > 1)
-        {
             $offset = $page * 20;
-        }
+
         $categories = Category::with('channels')
             ->when(!is_null($search),function($q) use($search){
                return $q->where('name','like',"%{$search}%");
@@ -29,9 +28,8 @@ class CategoryController extends Controller
             ->offset($offset)
             ->limit(20)
             ->get();
-        if(is_null($categories)){
-            return $this->returnError('Categories not found');
-        }
+
+
         return $this->returnData('categories', $categories);
     }
 
@@ -48,42 +46,54 @@ class CategoryController extends Controller
 
     public function store(Request $request): JsonResponse
     {
-        /*$validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'description' => 'text',
+        $validator = Validator::make($request->all(), [
+            'name_en' => 'required|string',
+            'name_ar' => 'required|string',
+            'image' => 'required|string',
         ]);
         if ($validator->fails()) {
             return $this->sendErrorValidator($validator);
-        }*/
+        }
+
+        $slug = Str::slug($request->name_en);
+        $category = Category::where('slug',$slug)->first();
+
+        if(!is_null($category)){
+            return $this->returnError('Category already exist');
+        }
 
         $category = null;
 
         try {
-            DB::transaction(function ()use (&$category , &$request) {
+            DB::transaction(function ()use (&$category, &$request, &$slug) {
                 $category = new Category();
-                $category->name = $request->name;
-                $category->hash = Str::random(40);
-                $category->description = $request->description;
+                $category->name_en = $request->name_en;
+                $category->name_ar = $request->name_ar;
+                $category->image = $request->image;
+                $category->slug = $slug;
+                $category->type = 1;
                 $category->save();
+                $category->load('channels');
+                $category->type = Category::getType($category->type);
             });
 
         }
         catch (\Exception $e){
             return $this->returnError($e);
         }
-        $category->load('channels');
         return $this->returnData('category', $category);
     }
 
     public function update(Request $request,$hash): JsonResponse
     {
-        /*$validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'description' => 'text',
+        $validator = Validator::make($request->all(), [
+            'name_en' => 'required|string',
+            'name_ar' => 'required|string',
+            'image' => 'required|string',
         ]);
         if ($validator->fails()) {
             return $this->sendErrorValidator($validator);
-        }*/
+        }
 
         $category = Category::where('hash',$hash)->first();
 
