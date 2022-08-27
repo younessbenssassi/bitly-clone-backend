@@ -15,10 +15,20 @@ class CreateChannelsTable extends Migration
     {
         Schema::create('channels', function (Blueprint $table) {
             $table->id();
-            $table->integer('category_id')->nullable();
+            $table->integer('category_id')->index()->nullable();
             $table->string('name');
             $table->string('slug');
-            $table->text('src');
+            $table->integer('visitors')->default(0);
+            $table->text('link_one_quality_one');
+            $table->text('link_one_quality_two');
+            $table->text('link_one_quality_three');
+            $table->text('link_two_quality_one')->nullable();
+            $table->text('link_two_quality_two')->nullable();
+            $table->text('link_two_quality_three')->nullable();
+            $table->text('link_three_quality_one')->nullable();
+            $table->text('link_three_quality_two')->nullable();
+            $table->text('link_three_quality_three')->nullable();
+            $table->text('image')->nullable();
             $table->timestamps();
         });
     }

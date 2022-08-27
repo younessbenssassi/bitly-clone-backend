@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -45,7 +46,11 @@ class AuthController extends Controller
                 return $this->returnError('Email or password not correct');
 
             $account = auth($guard)->user();
-            $account->isAdmin = $guard === 'admin-api';
+            if($guard === 'user-api'){
+                $account->last_login = Carbon::now();
+                $account->save();
+            }else
+                $account->isAdmin = true;
 
             $account->access_token = $token;
             //return token
@@ -91,7 +96,7 @@ class AuthController extends Controller
             if(is_null($token))
                 return  $this->returnError('some thing went wrongs');
 
-            $account->isAdmin = $guard === 'admin-api';
+            $account->isAdmin = $guard === 'admin-api' ?  true : false;
             $account->access_token = $token;
 
         }catch (\Exception $e){
@@ -130,7 +135,7 @@ class AuthController extends Controller
                 return $this->returnError('Email or password not correct');
 
             $account = auth($guard)->user();
-            $account->isAdmin = $guard === 'admin-api';
+            $account->isAdmin = $guard === 'admin-api' ? true : false;
 
             $account->access_token = $token;
             //return token

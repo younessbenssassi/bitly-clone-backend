@@ -22,7 +22,8 @@ class CategoryController extends Controller
 
         $categories = Category::with('channels')
             ->when(!is_null($search),function($q) use($search){
-               return $q->where('name','like',"%{$search}%");
+               return $q->where('name_en','like',"%{$search}%")
+                   ->orWhere('name_ar','like',"%{$search}%");
             })
             ->orderBy('id', 'DESC')
             ->offset($offset)
@@ -33,9 +34,16 @@ class CategoryController extends Controller
         return $this->returnData('categories', $categories);
     }
 
-    public function show(Request $request,$hash): JsonResponse
+    /**
+     * @param Request $request
+     * @param $id
+     * @return JsonResponse
+     */
+    public function show(Request $request,$id): JsonResponse
     {
-        $category = Category::with('channels')->where('hash',$hash)->first();
+        $category = Category::with('channels')->find($id);
+        $category->visitors = $category->visitors + 1;
+        $category->save();
 
         if(is_null($category)){
             return $this->returnError('Category not found');
@@ -44,12 +52,17 @@ class CategoryController extends Controller
         return $this->returnData('category', $category);
     }
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function store(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'name_en' => 'required|string',
             'name_ar' => 'required|string',
             'image' => 'required|string',
+            'type_id' => 'required',
         ]);
         if ($validator->fails()) {
             return $this->sendErrorValidator($validator);
@@ -70,11 +83,11 @@ class CategoryController extends Controller
                 $category->name_en = $request->name_en;
                 $category->name_ar = $request->name_ar;
                 $category->image = $request->image;
+                $category->type_id = $request->type_id;
                 $category->slug = $slug;
-                $category->type = 1;
                 $category->save();
                 $category->load('channels');
-                $category->type = Category::getType($category->type);
+                $category->type = Category::getType($category->type_id);
             });
 
         }
@@ -84,7 +97,12 @@ class CategoryController extends Controller
         return $this->returnData('category', $category);
     }
 
-    public function update(Request $request,$hash): JsonResponse
+    /**
+     * @param Request $request
+     * @param $id
+     * @return JsonResponse
+     */
+    public function update(Request $request,$id): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'name_en' => 'required|string',
@@ -95,17 +113,29 @@ class CategoryController extends Controller
             return $this->sendErrorValidator($validator);
         }
 
-        $category = Category::where('hash',$hash)->first();
+        $category = Category::find($id);
 
         if(is_null($category)){
             return $this->returnError('Category not found');
         }
 
+        $slug = Str::slug($request->name_en);
+        $slugCheckCategory = Category::where('slug',$slug)->first();
+
+        if(!is_null($slugCheckCategory) && intval($slugCheckCategory->id) !== intval($id)){
+            return $this->returnError('Category already exist');
+        }
+
         try {
-            DB::transaction(function ()use (&$category , &$request) {
-                $category->name = $request->name;
-                $category->description = $request->description;
+            DB::transaction(function ()use (&$category , &$request,&$slug) {
+                $category->name_en = $request->name_en;
+                $category->name_ar = $request->name_ar;
+                $category->image = $request->image;
+                $category->type_id = $request->type_id;
+                $category->slug = $slug;
                 $category->save();
+                $category->load('channels');
+                $category->type = Category::getType($category->type_id);
             });
 
         }
@@ -117,9 +147,14 @@ class CategoryController extends Controller
         return $this->returnData('category', $category);
     }
 
-    public function destroy(Request $request,$hash)
+    /**
+     * @param Request $request
+     * @param $id
+     * @return JsonResponse|array
+     */
+    public function destroy(Request $request,$id): JsonResponse|array
     {
-        $category = Category::where('hash',$hash)->first();
+        $category = Category::find($id);
 
         if(is_null($category)){
             return $this->returnError('Category not found');

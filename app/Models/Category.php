@@ -9,12 +9,6 @@ class Category extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'name_en',
-        'name_ar',
-        'image',
-    ];
-
     public function channels(): HasMany
     {
         return $this->hasMany(Channel::class,'category_id');
@@ -23,12 +17,29 @@ class Category extends Model
     public static function getTypes() : array{
         return [
             1 => [
-                "type" => "sport",
+                "name" => "Sport",
+                "slug" => "sport",
                 "id" => 1
             ],
             2 => [
-                "name" => "news",
+                "name" => "Netflix",
+                "slug" => "netflix",
                 "id" => 2
+            ],
+            3 => [
+                "name" => "Movies",
+                "slug" => "movies",
+                "id" => 3
+            ],
+            4 => [
+                "name" => "News",
+                "slug" => "news",
+                "id" => 4
+            ],
+            5 => [
+                "name" => "Carton",
+                "slug" => "carton",
+                "id" => 5
             ],
         ];
     }

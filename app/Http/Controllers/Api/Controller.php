@@ -28,12 +28,12 @@ class Controller extends BaseController
     }
 
 
-    public function returnSuccessMessage($msg = ""): array
+    public function returnSuccessMessage($msg = ""): JsonResponse
     {
-        return [
+        return response()->json([
             'status' => true,
             'message' => $msg
-        ];
+        ]);
     }
 
     public function returnData($key, $value):JsonResponse
