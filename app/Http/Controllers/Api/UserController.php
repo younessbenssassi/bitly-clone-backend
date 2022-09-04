@@ -142,4 +142,43 @@ class UserController extends Controller
 
         return $this->returnSuccessMessage('Account deleted successfully');
     }
+
+    public function updateUserChannelsToggle(Request $request) : JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            "channel_id" => "required|exists:channels,id",
+        ]);
+        if ($validator->fails()) {
+            return $this->sendErrorValidator($validator);
+        }
+
+        $account = Auth::guard('user-api')->user();
+        if(is_null($account)){
+            return $this->returnError('Account not found');
+        }
+
+        $user = User::with('channels')->find($account->id);
+        $userChannelsIds = $user->channels->pluck('id')->toArray();
+
+        try {
+            DB::transaction(function ()use (&$userChannelsIds, &$request,&$user) {
+
+                $key = array_search($request->channel_id, $userChannelsIds);
+                if ($key !== false) {
+                    unset($userChannelsIds[$key]);
+                }else{
+                    $userChannelsIds[] = $request->channel_id;
+                }
+                $user->channels()->sync($userChannelsIds);
+
+            });
+
+            return $this->sendSuccessResponse([
+                'status' => true,
+            ]);
+        }
+        catch (\Exception $e){
+            return $this->sendErrorResponse($e);
+        }
+    }
 }

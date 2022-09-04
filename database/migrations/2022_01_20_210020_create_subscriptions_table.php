@@ -16,10 +16,15 @@ class CreateSubscriptionsTable extends Migration
         Schema::create('subscriptions', function (Blueprint $table) {
             $table->id();
             $table->string('hash');
-            $table->integer('user_id')->nullable();
+            $table->integer('user_id');
+            $table->boolean('approved')->default(0);
+            $table->integer('amount');
+            $table->integer('code');
+            $table->integer('repeat_code');
+            $table->string('reject_reason');
+            $table->text('note');
             $table->date('start_date');
             $table->date('end_date');
-            $table->integer('amount');
             $table->timestamps();
         });
     }
@@ -31,6 +36,6 @@ class CreateSubscriptionsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('channels');
+        Schema::dropIfExists('subscriptions');
     }
 }

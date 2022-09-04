@@ -19,7 +19,7 @@ class CreateUsersTable extends Migration
             $table->integer('subscription_id')->nullable();
             $table->string('name');
             $table->string('email');
-            $table->boolean('active')->nullable();
+            $table->boolean('active')->default(1);
             $table->string('password');
             $table->date('last_login')->nullable();
             $table->timestamps();
