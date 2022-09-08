@@ -15,8 +15,8 @@ class CreateSubscriptionsTable extends Migration
     {
         Schema::create('subscriptions', function (Blueprint $table) {
             $table->id();
-            $table->string('hash');
-            $table->integer('user_id');
+            $table->string('hash')->index();
+            $table->integer('user_id')->index();
             $table->boolean('approved')->default(0);
             $table->integer('amount');
             $table->integer('code');
