@@ -143,6 +143,10 @@ class UserController extends Controller
         return $this->returnSuccessMessage('Account deleted successfully');
     }
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function updateUserChannelsToggle(Request $request) : JsonResponse
     {
         $validator = Validator::make($request->all(), [
@@ -161,9 +165,10 @@ class UserController extends Controller
         $userChannelsIds = $user->channels->pluck('id')->toArray();
 
         try {
-            DB::transaction(function ()use (&$userChannelsIds, &$request,&$user) {
+            $key = array_search($request->channel_id, $userChannelsIds);
 
-                $key = array_search($request->channel_id, $userChannelsIds);
+            DB::transaction(function ()use (&$userChannelsIds, &$request,&$user, &$key) {
+
                 if ($key !== false) {
                     unset($userChannelsIds[$key]);
                 }else{
@@ -173,12 +178,13 @@ class UserController extends Controller
 
             });
 
-            return $this->sendSuccessResponse([
+            return response()->json([
                 'status' => true,
+                'message' => $key ? 'Channel removed successfully' : 'Channel added successfully'
             ]);
         }
         catch (\Exception $e){
-            return $this->sendErrorResponse($e);
+            return $this->returnError($e);
         }
     }
 }

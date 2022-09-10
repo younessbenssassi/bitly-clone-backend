@@ -91,7 +91,6 @@ class AuthController extends Controller
         }
 
         try {
-            //$token = Auth::guard($guard)->tokenById($account['id']);
             $token = Auth::guard($guard)->refresh();
             if(is_null($token))
                 return  $this->returnError('some thing went wrongs');

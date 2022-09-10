@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\Category;
 use App\Models\Channel;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -110,20 +112,63 @@ class HomeController extends Controller
         ]);
     }
 
+    /**
+     * @param Request $request
+     * @param $slug
+     * @return JsonResponse
+     */
     public function getChannel(Request $request,$slug): JsonResponse
     {
         $channel = Channel::where('slug',$slug)
             ->with('category')
             ->first();
 
-
         if(is_null($channel)){
             return $this->returnError('Channel not found');
         }
+        try {
+            $account = Auth::guard('user-api')->user();
+            if(!is_null($account)){
+                $user = User::with('channels')->find($account->id);
+                $userChannelsIds = $user->channels->pluck('id')->toArray();
 
-        return response()->json([
-            'status' => true,
-            'channel'=> $channel,
-        ]);
+                if (in_array($channel->id, $userChannelsIds)) {
+                    $channel->in_my_list = true;
+                }else{
+                    $channel->in_my_list = false;
+                }
+            }
+
+            return response()->json([
+                'status' => true,
+                'channel'=> $channel,
+            ]);
+        }
+        catch (\Exception $e){
+            return $this->returnError($e);
+        }
+
+
+    }
+
+    public function myList(Request $request): JsonResponse
+    {
+        $account = Auth::guard('user-api')->user();
+        if(is_null($account)){
+            return $this->returnError('Account not found');
+        }
+
+        try {
+            $user = User::with('channels')->find($account->id);
+            return response()->json([
+                'status' => true,
+                'channels'=> $user->channels,
+            ]);
+        }
+        catch (\Exception $e){
+            return $this->returnError($e);
+        }
+
+
     }
 }
