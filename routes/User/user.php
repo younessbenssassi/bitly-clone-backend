@@ -3,6 +3,7 @@
 Route::middleware(['api'])->group(function () {
     Route::get('categories', 'App\Http\Controllers\Api\CategoryController@index');
     Route::get('channels', 'App\Http\Controllers\Api\ChannelController@index');
+    Route::post('create-account', 'App\Http\Controllers\Api\UserController@store');
     Route::put('update-account', 'App\Http\Controllers\Api\UserController@update');
     Route::put('user-channel', 'App\Http\Controllers\Api\UserController@updateUserChannelsToggle');
     Route::delete('delete-account', 'App\Http\Controllers\Api\UserController@destroy');

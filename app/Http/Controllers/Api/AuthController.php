@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -103,47 +104,6 @@ class AuthController extends Controller
         }
 
         return $this->returnData('account', $account);
-
-    }
-
-    public function register(Request $request): JsonResponse
-    {
-
-        try {
-            /*$rules = [
-                "email" => "required",
-                "password" => "required"
-
-            ];
-
-            $validator = Validator::make($request->all(), $rules);
-
-            if ($validator->fails()) {
-                $code = $this->returnCodeAccordingToInput($validator);
-                return $this->returnValidationError($code, $validator);
-            }*/
-
-            //login
-
-            $credentials = $request->only(['email', 'password']);
-
-            $guard = $request->header('guard');
-            $token = auth($guard)->attempt($credentials);
-
-            if (!$token)
-                return $this->returnError('Email or password not correct');
-
-            $account = auth($guard)->user();
-            $account->isAdmin = $guard === 'admin-api' ? true : false;
-
-            $account->access_token = $token;
-            //return token
-            return $this->returnData('account', $account);
-
-        } catch (\Exception $ex) {
-            return $this->returnError($ex->getMessage());
-        }
-
 
     }
 }
