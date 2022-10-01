@@ -20,16 +20,7 @@ class AdminController extends Controller
         $admins = Admin::all();
         return AdminResource::collection($admins);
     }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return Response
-     */
-    public function create()
-    {
-        //
-    }
+    
 
     /**
      * Store a newly created resource in storage.
