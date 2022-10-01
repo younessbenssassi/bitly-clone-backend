@@ -12,7 +12,6 @@ This project in a clone of bitly.com.
 
 * PHP ^8.0
 * Laravel Framework 8.83.25
-* MySQL support requires mysqldump and mysql command-line binaries
 
 ### Installing
 #### Composer
