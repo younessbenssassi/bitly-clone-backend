@@ -26,5 +26,5 @@ php artisan jwt:secret
 ## Acknowledgments
 
 Inspiration, code snippets, etc.
-* [login form](https://codepen.io/frytyler/pen/nJYVEO)
+* [Login form](https://codepen.io/frytyler/pen/nJYVEO)
 * [Left menu](https://codepen.io/ahmadbassamemran/pen/eBEEjL)
