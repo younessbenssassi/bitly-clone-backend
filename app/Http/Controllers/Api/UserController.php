@@ -20,17 +20,15 @@ class UserController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string',
+            'username' => 'required|string',
             'email' => 'required|string',
             'password' => 'required|string',
-            'repeatPassword' => 'required|string',
         ]);
         if ($validator->fails()) {
             return $this->sendErrorValidator($validator);
         }
 
         $user = User::where('email',$request->email)->first();
-
         if(!is_null($user)){
             return $this->returnError('Email already used in other account');
         }
@@ -41,7 +39,7 @@ class UserController extends Controller
             DB::transaction(function ()use (&$user, &$request, &$slug) {
                 $user = new User();
                 $user->hash = Str::random(30);
-                $user->name = $request->name;
+                $user->username = $request->username;
                 $user->email = $request->email;
                 $user->password = password_hash($request->password,PASSWORD_DEFAULT);
                 $user->save();

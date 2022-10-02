@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Api\Controller;
+use Illuminate\Support\Facades\Validator;
 
 //use Validator;
 //use Auth;
@@ -19,39 +20,32 @@ class AuthController extends Controller
         $this->middleware('api', ['except' => ['login']]);
     }
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function login(Request $request): JsonResponse
     {
 
         try {
-            /*$rules = [
-                "email" => "required",
-                "password" => "required"
-
-            ];
-
-            $validator = Validator::make($request->all(), $rules);
-
+            $validator = Validator::make($request->all(), [
+                'email' => 'required|string',
+                'password' => 'required|string',
+            ]);
             if ($validator->fails()) {
-                $code = $this->returnCodeAccordingToInput($validator);
-                return $this->returnValidationError($code, $validator);
-            }*/
+                return $this->sendErrorValidator($validator);
+            }
 
             //login
 
-            $guard = $request->header('guard');
             $credentials = $request->only(['email', 'password']);
-            $token = auth($guard)->attempt($credentials);
+            $token = auth('user-api')->attempt($credentials);
 
 
             if (!$token)
                 return $this->returnError('Email or password not correct');
 
-            $account = auth($guard)->user();
-            if($guard === 'user-api'){
-                $account->last_login = Carbon::now();
-                $account->save();
-            }else
-                $account->isAdmin = true;
+            $account = auth('user-api')->user();
 
             $account->access_token = $token;
             //return token
@@ -64,14 +58,17 @@ class AuthController extends Controller
 
     }
 
-    public function logout(Request $request)
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function logout(Request $request): JsonResponse
     {
-        $guard = $request->header('guard');
-        $account = Auth::guard($guard)->user();
+        $account = Auth::guard('user-api')->user();
 
         if(!is_null($account)){
             try {
-                Auth::guard($guard)->logout();
+                Auth::guard('user-api')->logout();
             }catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e){
                 return  $this->returnError('some thing went wrongs');
             }
@@ -82,21 +79,23 @@ class AuthController extends Controller
 
     }
 
-    public function getAuthState(Request $request)
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getAuthState(Request $request): JsonResponse
     {
-        $guard = $request->header('guard');
-        $account = Auth::guard($guard)->user();
+        $account = Auth::guard('user-api')->user();
 
         if(is_null($account)){
             return $this->returnError('some thing went wrongs');
         }
 
         try {
-            $token = Auth::guard($guard)->refresh();
+            $token = Auth::guard('user-api')->refresh();
             if(is_null($token))
                 return  $this->returnError('some thing went wrongs');
 
-            $account->isAdmin = $guard === 'admin-api' ?  true : false;
             $account->access_token = $token;
 
         }catch (\Exception $e){

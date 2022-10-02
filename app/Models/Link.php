@@ -6,13 +6,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use \Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Channel extends Model
+class Link extends Model
 {
     use HasFactory;
 
-    public function category(): BelongsTo
+    /**
+     * @return BelongsTo
+     */
+    public function owner(): BelongsTo
     {
-        return $this->belongsTo(Category::class,'category_id');
+        return $this->belongsTo(User::class,'user_id');
     }
 
 }
